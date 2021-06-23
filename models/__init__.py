@@ -1,0 +1,1 @@
+from models.registration import load
