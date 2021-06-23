@@ -54,6 +54,7 @@ class GuandanGame:
 
         # get state of first player
         player_id = self.round.current_player
+        # print(player_id)
         self.state = self.get_state(player_id)
 
         return self.state, player_id

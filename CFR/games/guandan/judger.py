@@ -119,7 +119,7 @@ class GuandanJudger:
                     count += 1
                     left_officer -= 2
                     prev_index += 1
-                    officer_index.append([count - 1, count - 1])
+                    officer_index += [count - 1, count - 1]
                 else:
                     break
             # pair_chain_3
@@ -175,7 +175,7 @@ class GuandanJudger:
                     count += 1
                     left_officer -= 2
                     prev_index += 1
-                    officer_index.append([count - 1, count - 1])
+                    officer_index += [count - 1, count - 1]
                 else:
                     break
             # trio_chain_2
@@ -251,7 +251,7 @@ class GuandanJudger:
             if 0 in officer_index:
                 cards += self.officer
             while s < start_index + length:
-                if s - start_index != 0 and s - start_index in solo_chain_indexes:
+                if s - start_index != 0 and s - start_index in officer_index:
                     cards += self.officer
                 else:
                     cards += CARD_RANK_STR[s]
@@ -469,13 +469,19 @@ def arrange_solo(start, count, officer_index):
     if cnt == 1:
         # 加在头部
         tmp = officer_index.copy()
-        tmp.remove(count - 1)
+        if count-1 in tmp:
+            tmp.remove(count - 1)
+        else:
+            tmp.remove(count-2)
         chains.append((start, count, [0] + tmp))
         # 取代某一张牌
         for i in range(count):
             if i not in officer_index:
                 tmp = officer_index.copy()
-                tmp.remove(count - 1)
+                if count-1 in tmp:
+                    tmp.remove(count - 1)
+                else:
+                    tmp.remove(count-2)
                 tmp += [i]
                 tmp.sort()
                 chains.append((start, count - 1, tmp))
@@ -524,7 +530,7 @@ def arrange_pair(start, count, officer_index):
         # 放在开头
         tmp = officer_index.copy()
         tmp.remove(count - 1)
-        chains.append([0] + tmp)
+        chains.append((start,count,[0] + tmp))
 
         # 取代某对牌
         for i in range(count):

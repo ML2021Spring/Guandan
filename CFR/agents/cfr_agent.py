@@ -64,7 +64,7 @@ class CFRAgent():
         obs, legal_actions = self.get_state(current_player)
         action_probs = self.action_probs(obs, legal_actions, self.policy)
 
-        for action in legal_actions:
+        for action in legal_actions[:1]:
             action_prob = action_probs[action]
             new_probs = probs.copy()
             new_probs[current_player] *= action_prob
@@ -90,7 +90,7 @@ class CFRAgent():
             self.regrets[obs] = np.zeros(self.env.num_actions)
         if obs not in self.average_policy:
             self.average_policy[obs] = np.zeros(self.env.num_actions)
-        for action in legal_actions:
+        for action in legal_actions[:1]:
             action_prob = action_probs[action]
             regret = counterfactual_prob * (action_utilities[action][current_player]
                     - player_state_utility)
@@ -158,7 +158,7 @@ class CFRAgent():
         action = np.random.choice(len(probs), p=probs)
 
         info = {}
-        info['probs'] = {state['raw_legal_actions'][i]: float(probs[list(state['legal_actions'].keys())[i]]) for i in range(len(state['legal_actions']))}
+        info['probs'] = {state['raw_legal_actions'][i]: float(probs[state['legal_actions'][i]]) for i in range(len(state['legal_actions']))}
 
         return action, info
 

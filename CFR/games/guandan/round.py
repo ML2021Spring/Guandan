@@ -51,7 +51,7 @@ class GuandanRound:
         self.dealer.init(self.players)
         # 如果是游戏的第一小局，随机选择一个玩家开始游戏
         if not self.winner_group:
-            self.current_player = random.randint(0, 4)
+            self.current_player = random.randint(0, 3)
         # 否则进贡
         else:
             # TODO 还贡

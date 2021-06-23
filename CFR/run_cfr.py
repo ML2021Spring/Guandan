@@ -7,9 +7,10 @@ import CFR
 from CFR.agents import CFRAgent, RandomAgent
 from CFR.utils import set_seed, tournament, Logger, plot_curve
 
+
 def train(args):
     # Make environments, CFR only supports Leduc Holdem
-    env = CFR.make('guandan', config={'seed': 0, 'allow_step_back':True})
+    env = CFR.make('guandan', config={'seed': 0, 'allow_step_back': True})
     eval_env = CFR.make('guandan', config={'seed': 0})
 
     # Seed numpy, torch, random
@@ -20,7 +21,8 @@ def train(args):
     agent.load()  # If we have saved model, we first load the model
 
     # Evaluate CFR against random
-    eval_env.set_agents([agent, RandomAgent(num_actions=env.num_actions)])
+    eval_env.set_agents(
+        [agent, RandomAgent(num_actions=env.num_actions), RandomAgent(num_actions=env.num_actions), RandomAgent(num_actions=env.num_actions)])
 
     # Start training
     with Logger(args.log_dir) as logger:
@@ -29,13 +31,14 @@ def train(args):
             print('\rIteration {}'.format(episode), end='')
             # Evaluate the performance. Play with Random agents.
             if episode % args.evaluate_every == 0:
-                agent.save() # Save model
+                agent.save()  # Save model
                 logger.log_performance(env.timestep, tournament(eval_env, args.num_eval_games)[0])
 
         # Get the paths
         csv_path, fig_path = logger.csv_path, logger.fig_path
     # Plot the learning curve
     plot_curve(csv_path, fig_path, 'cfr')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("CFR example in RLCard")
