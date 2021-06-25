@@ -33,6 +33,7 @@ class GuandanGame:
         """
         # initialize public variables
         self.winner_group = None
+        self.winner_id = []
         self.history = []
         # 当前两组玩家的参谋
         self.group_officer = ['2', '2']
@@ -72,9 +73,8 @@ class GuandanGame:
         # perfrom action
         player = self.players[self.round.current_player]
         self.round.proceed_round(player, action)
-        print(player.player_id,action)
-        print(cards2str(player.current_hand))
-
+        # print(player.player_id, action)
+        # print(cards2str(player.current_hand))
 
         # 如果出牌
         if action != 'pass':

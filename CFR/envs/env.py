@@ -142,6 +142,7 @@ class Env(object):
             # Agent plays
             if not is_training:
                 action, _ = self.agents[player_id].eval_step(state)
+                # print(player_id,action)
             else:
                 action = self.agents[player_id].step(state)
 

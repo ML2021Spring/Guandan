@@ -238,16 +238,18 @@ def encode_cards(plane, cards):
             if index == 0:
                 continue
             #
-            if card == cards[index - 1]:
-                layer += 1
-            else:
-                rank = CARD_RANK_STR.index(cards[index - 1])
+            # if card == cards[index - 1]:
+            #     layer += 1
+            # else:
+            rank = CARD_RANK_STR.index(cards[index - 1])
+            if plane[layer][rank] == 0:
                 plane[layer][rank] = 1
                 layer = 1
                 plane[0][rank] = 0
         rank = CARD_RANK_STR.index(cards[-1])
-        plane[layer][rank] = 1
-        plane[0][rank] = 0
+        if plane[layer][rank] == 0:
+            plane[layer][rank] = 1
+            plane[0][rank] = 0
 
 
 # 获得比之前玩家出的牌更大的牌
@@ -308,7 +310,8 @@ def get_gt_cards(player, greater_player, officer, h_officer_num):
                         gt_cards.append(cards)
     return gt_cards
 
- # 按照牌的大小排序
+
+# 按照牌的大小排序
 def sort_card(card_1, card_2):
     """ Compare the rank of two cards of Card object
 

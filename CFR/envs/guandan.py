@@ -30,7 +30,9 @@ class GuandanEnv(Env):
 
         self.game = Game()
         super().__init__(config)
-        self.state_shape = [7, 5, 15]
+        # self.state_shape = [7, 5, 15]
+        # 减小状态假设空间，加快收敛速度
+        self.state_shape = [2, 9, 15]
 
     def _extract_state(self, state):
         ''' Encode state
@@ -45,18 +47,19 @@ class GuandanEnv(Env):
                              the recent three actions
                              the union of all played cards
         '''
-        obs = np.zeros((7, 9, 15), dtype=int)
-        for index in range(7):
+        # obs = np.zeros((7, 9, 15), dtype=int)
+        obs = np.zeros((2, 2, 15), dtype=int)
+        for index in range(2):
             obs[index][0] = np.ones(15, dtype=int)
         self._encode_cards(obs[0], state['current_hand'])
         self._encode_cards(obs[1], state['others_hand'])
-        for i, action in enumerate(state['trace'][-4:]):
-            if action[1] != 'pass':
-                self._encode_cards(obs[5 - i], action[1])
+        # for i, action in enumerate(state['trace'][-4:]):
+        #     if action[1] != 'pass':
+        #         self._encode_cards(obs[5 - i], action[1])
         # print(state['played_cards'])
         # print(state['played_cards'])
-        if state['played_cards'] != None:
-            self._encode_cards(obs[6], state['played_cards'])
+        # if state['played_cards'] != None:
+        #     self._encode_cards(obs[6], state['played_cards'])
 
         extracted_state = {'obs': obs, 'legal_actions': self._get_legal_actions()}
         extracted_state['raw_obs'] = state

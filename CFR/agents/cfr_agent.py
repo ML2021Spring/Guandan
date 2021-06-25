@@ -6,6 +6,7 @@ import pickle
 
 from CFR.utils.utils import *
 
+
 class CFRAgent():
     ''' Implement CFR (chance sampling) algorithm
     '''
@@ -58,24 +59,25 @@ class CFRAgent():
             return self.env.get_payoffs()
 
         current_player = self.env.get_player_id()
-        print("current_player",current_player)
+        # print("current_player", current_player)
         action_utilities = {}
         state_utility = np.zeros(self.env.num_players)
         obs, legal_actions = self.get_state(current_player)
         action_probs = self.action_probs(obs, legal_actions, self.policy)
 
-        for action in legal_actions[:1]:
-            action_prob = action_probs[action]
-            new_probs = probs.copy()
-            new_probs[current_player] *= action_prob
+        action = np.random.choice(len(action_probs), p=action_probs)
+        # for action in legal_actions[:1]:
+        action_prob = action_probs[action]
+        new_probs = probs.copy()
+        new_probs[current_player] *= action_prob
 
-            # Keep traversing the child state
-            self.env.step(action)
-            utility = self.traverse_tree(new_probs, player_id)
-            self.env.step_back()
+        # Keep traversing the child state
+        self.env.step(action)
+        utility = self.traverse_tree(new_probs, player_id)
+        self.env.step_back()
 
-            state_utility += action_prob * utility
-            action_utilities[action] = utility
+        state_utility += action_prob * utility
+        action_utilities[action] = utility
 
         if not current_player == player_id:
             return state_utility
@@ -83,19 +85,19 @@ class CFRAgent():
         # If it is current player, we record the policy and compute regret
         player_prob = probs[current_player]
         counterfactual_prob = (np.prod(probs[:current_player]) *
-                                np.prod(probs[current_player + 1:]))
+                               np.prod(probs[current_player + 1:]))
         player_state_utility = state_utility[current_player]
 
         if obs not in self.regrets:
             self.regrets[obs] = np.zeros(self.env.num_actions)
         if obs not in self.average_policy:
             self.average_policy[obs] = np.zeros(self.env.num_actions)
-        for action in legal_actions[:1]:
-            action_prob = action_probs[action]
-            regret = counterfactual_prob * (action_utilities[action][current_player]
-                    - player_state_utility)
-            self.regrets[obs][action] += regret
-            self.average_policy[obs][action] += self.iteration * player_prob * action_prob
+        # for action in legal_actions:
+        action_prob = action_probs[action]
+        regret = counterfactual_prob * (action_utilities[action][current_player]
+                                        - player_state_utility)
+        self.regrets[obs][action] += regret
+        self.average_policy[obs][action] += self.iteration * player_prob * action_prob
         return state_utility
 
     def update_policy(self):
@@ -137,7 +139,7 @@ class CFRAgent():
                 legal_actions (list): Indices of legal actions
         '''
         if obs not in policy.keys():
-            action_probs = np.array([1.0/self.env.num_actions for _ in range(self.env.num_actions)])
+            action_probs = np.array([1.0 / self.env.num_actions for _ in range(self.env.num_actions)])
             self.policy[obs] = action_probs
         else:
             action_probs = policy[obs]
@@ -158,7 +160,8 @@ class CFRAgent():
         action = np.random.choice(len(probs), p=probs)
 
         info = {}
-        info['probs'] = {state['raw_legal_actions'][i]: float(probs[state['legal_actions'][i]]) for i in range(len(state['legal_actions']))}
+        info['probs'] = {state['raw_legal_actions'][i]: float(probs[state['legal_actions'][i]]) for i in
+                         range(len(state['legal_actions']))}
 
         return action, info
 
@@ -182,19 +185,19 @@ class CFRAgent():
         if not os.path.exists(self.model_path):
             os.makedirs(self.model_path)
 
-        policy_file = open(os.path.join(self.model_path, 'policy.pkl'),'wb')
+        policy_file = open(os.path.join(self.model_path, 'policy.pkl'), 'wb')
         pickle.dump(self.policy, policy_file)
         policy_file.close()
 
-        average_policy_file = open(os.path.join(self.model_path, 'average_policy.pkl'),'wb')
+        average_policy_file = open(os.path.join(self.model_path, 'average_policy.pkl'), 'wb')
         pickle.dump(self.average_policy, average_policy_file)
         average_policy_file.close()
 
-        regrets_file = open(os.path.join(self.model_path, 'regrets.pkl'),'wb')
+        regrets_file = open(os.path.join(self.model_path, 'regrets.pkl'), 'wb')
         pickle.dump(self.regrets, regrets_file)
         regrets_file.close()
 
-        iteration_file = open(os.path.join(self.model_path, 'iteration.pkl'),'wb')
+        iteration_file = open(os.path.join(self.model_path, 'iteration.pkl'), 'wb')
         pickle.dump(self.iteration, iteration_file)
         iteration_file.close()
 
@@ -203,20 +206,22 @@ class CFRAgent():
         '''
         if not os.path.exists(self.model_path):
             return
-
-        policy_file = open(os.path.join(self.model_path, 'policy.pkl'),'rb')
-        self.policy = pickle.load(policy_file)
+        print(self.model_path)
+        policy_file = open(os.path.join(self.model_path, 'policy.pkl'), 'rb')
+        try:
+            self.policy = pickle.load(policy_file)
+        except EOFError:
+            pass
         policy_file.close()
 
-        average_policy_file = open(os.path.join(self.model_path, 'average_policy.pkl'),'rb')
+        average_policy_file = open(os.path.join(self.model_path, 'average_policy.pkl'), 'rb')
         self.average_policy = pickle.load(average_policy_file)
         average_policy_file.close()
 
-        regrets_file = open(os.path.join(self.model_path, 'regrets.pkl'),'rb')
+        regrets_file = open(os.path.join(self.model_path, 'regrets.pkl'), 'rb')
         self.regrets = pickle.load(regrets_file)
         regrets_file.close()
 
-        iteration_file = open(os.path.join(self.model_path, 'iteration.pkl'),'rb')
+        iteration_file = open(os.path.join(self.model_path, 'iteration.pkl'), 'rb')
         self.iteration = pickle.load(iteration_file)
         iteration_file.close()
-
